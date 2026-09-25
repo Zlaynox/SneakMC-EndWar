@@ -1,0 +1,11 @@
+name: SneakMC-EndWar
+version: 1.0.0
+main: com.sneakmc.endwar.SneakMCEndWar
+api-version: '1.21'
+author: SneakMC
+description: SneakMC End War control system
+
+commands:
+  endwar:
+    description: Opens the SneakMC End War control panel
+    usage: /endwar
