@@ -1,7 +1,6 @@
 package com.sneakmc.endwar;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -21,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +40,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
 
         endUnlocked = readEndRtp();
-        dragonOn = false;
+
+        // Keep Dragon status synchronized with the saved End state
+        dragonOn = endUnlocked;
 
         getLogger().info("SneakMC End War enabled.");
     }
@@ -56,7 +56,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
     ) {
 
         if (!sender.isOp()) {
-            sender.sendMessage("§c§l✖ §cYou must be OP to use End War controls.");
+            sender.sendMessage(
+                    "§c§l✖ §cYou must be OP to use End War controls."
+            );
             return true;
         }
 
@@ -64,7 +66,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
             if (sender instanceof Player player) {
                 openMenu(player);
             } else {
-                sender.sendMessage("§eUse: /endwar <unlock|lock|status>");
+                sender.sendMessage(
+                        "§eUse: /endwar <unlock|lock|status>"
+                );
             }
             return true;
         }
@@ -85,7 +89,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
 
             default:
                 sender.sendMessage("§eUsage: /endwar");
-                sender.sendMessage("§7or: /endwar <unlock|lock|status>");
+                sender.sendMessage(
+                        "§7or: /endwar <unlock|lock|status>"
+                );
                 break;
         }
 
@@ -104,7 +110,6 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
                 GUI_TITLE
         );
 
-        // Filler
         ItemStack filler = item(
                 Material.PURPLE_STAINED_GLASS_PANE,
                 " "
@@ -114,7 +119,6 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
             inventory.setItem(i, filler);
         }
 
-        // Unlock button
         ItemStack unlock = item(
                 Material.DRAGON_EGG,
                 "§5§l🔓 UNLOCK END",
@@ -125,7 +129,6 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
                 " "
         );
 
-        // Status button
         ItemStack status = item(
                 Material.BOOK,
                 "§e§l📖 END STATUS",
@@ -138,7 +141,6 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
                 " "
         );
 
-        // Lock button
         ItemStack lock = item(
                 Material.BARRIER,
                 "§c§l🔒 LOCK END",
@@ -189,7 +191,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
 
         if (!player.isOp()) {
             player.closeInventory();
-            player.sendMessage("§c§l✖ §cYou must be OP to use this menu.");
+            player.sendMessage(
+                    "§c§l✖ §cYou must be OP to use this menu."
+            );
             return;
         }
 
@@ -255,10 +259,10 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
 
         if (seconds <= 0) {
 
-            // Final announcement and activation happen together.
             enableEnd();
 
             for (Player player : Bukkit.getOnlinePlayers()) {
+
                 player.sendTitle(
                         "§5§l🔥 THE END IS OPEN! 🔥",
                         "§dEnd RTP is now available.",
@@ -326,16 +330,12 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
         endUnlocked = true;
         dragonOn = true;
 
-        // Change RtpGUI: false -> true
         setEndRtp(true);
 
-        // Reload RtpGUI
         runConsole("rtpgui reload");
 
-        // Unlock EndGuard
         runConsole("end unlock");
 
-        // Enable dragon
         runConsole("end dragon on");
     }
 
@@ -355,16 +355,12 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
         endUnlocked = false;
         dragonOn = false;
 
-        // Lock EndGuard
         runConsole("end lock");
 
-        // Disable dragon
         runConsole("end dragon off");
 
-        // Change RtpGUI: true -> false
         setEndRtp(false);
 
-        // Reload RtpGUI
         runConsole("rtpgui reload");
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -398,36 +394,61 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
     // STATUS
     // =========================================================
 
-    private void sendStatus(org.bukkit.command.CommandSender sender) {
+    private void sendStatus(
+            org.bukkit.command.CommandSender sender
+    ) {
 
-        sender.sendMessage("§8§m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        sender.sendMessage("§5⚔ §d§lEND WAR STATUS");
+        sender.sendMessage(
+                "§8§m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        );
+
+        sender.sendMessage(
+                "§5⚔ §d§lEND WAR STATUS"
+        );
+
         sender.sendMessage("");
-        sender.sendMessage("§7End Access:     " + accessStatus());
-        sender.sendMessage("§7Ender Dragon:   " + dragonStatus());
-        sender.sendMessage("§7End RTP:        " + rtpStatus());
+
+        sender.sendMessage(
+                "§7End Access:     " + accessStatus()
+        );
+
+        sender.sendMessage(
+                "§7Ender Dragon:   " + dragonStatus()
+        );
+
+        sender.sendMessage(
+                "§7End RTP:        " + rtpStatus()
+        );
+
         sender.sendMessage("");
+
         sender.sendMessage(
                 endUnlocked
                         ? "§a✔ The End is currently OPEN."
                         : "§c✖ The End is currently LOCKED."
         );
-        sender.sendMessage("§8§m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+        sender.sendMessage(
+                "§8§m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        );
     }
 
     private String accessStatus() {
+
         return endUnlocked
                 ? "§a§lUNLOCKED"
                 : "§c§lLOCKED";
     }
 
     private String dragonStatus() {
+
         return dragonOn
                 ? "§a§lON"
                 : "§c§lOFF";
     }
 
     private String rtpStatus() {
+
         return readEndRtp()
                 ? "§a§lENABLED"
                 : "§c§lDISABLED";
@@ -455,7 +476,9 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
             Matcher matcher = endRtpPattern.matcher(text);
 
             if (matcher.find()) {
-                return Boolean.parseBoolean(matcher.group(2));
+                return Boolean.parseBoolean(
+                        matcher.group(2)
+                );
             }
 
         } catch (IOException exception) {
@@ -551,4 +574,4 @@ public final class SneakMCEndWar extends JavaPlugin implements Listener {
             Bukkit.broadcastMessage(message);
         }
     }
-  }
+            }
